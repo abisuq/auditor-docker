@@ -4,7 +4,12 @@ FROM ubuntu:jammy AS audit-toolbox
 LABEL org.opencontainers.image.authors="Deivitto"
 LABEL org.opencontainers.image.description="Audit Toolbox for Ethereum Smart Contracts"
 
+
+
 # Update package list and install necessary programs
+RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && \
+    sed -i s@/security.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && \
+    apt-get clean
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     build-essential \
@@ -35,9 +40,12 @@ RUN apt-get update && \
     pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
+    
+RUN curl -o- https://yices.csl.sri.com/releases/2.6.4/yices-2.6.4-x86_64-pc-linux-gnu.tar.gz | tar -xz && cd ./yices-2.6.4 && sh ./install-yices
+
 # Add Ethereum and Yices PPA repositories and install packages
+
 RUN add-apt-repository -y ppa:ethereum/ethereum && \
-    add-apt-repository -y ppa:sri-csl/formal-methods && \
     add-apt-repository -y ppa:deadsnakes/ppa  && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -46,9 +54,7 @@ RUN add-apt-repository -y ppa:ethereum/ethereum && \
     python3.9-dev \
     python3.9-venv \
     python3-pip \
-    python3.9-distutils \
-    yices2 && \
-    rm -rf /var/lib/apt/lists/*
+    python3.9-distutils
 
 # Install Julia
 RUN curl -fsSL https://julialang-s3.julialang.org/bin/linux/x64/1.7/julia-1.7.1-linux-x86_64.tar.gz -o julia.tar.gz && \
