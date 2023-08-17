@@ -40,9 +40,6 @@ RUN apt-get update && \
     pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
-    
-RUN curl -o- https://yices.csl.sri.com/releases/2.6.4/yices-2.6.4-x86_64-pc-linux-gnu.tar.gz | tar -xz && cd ./yices-2.6.4 && sh ./install-yices
-
 # Add Ethereum and Yices PPA repositories and install packages
 
 RUN add-apt-repository -y ppa:ethereum/ethereum && \
@@ -54,7 +51,19 @@ RUN add-apt-repository -y ppa:ethereum/ethereum && \
     python3.9-dev \
     python3.9-venv \
     python3-pip \
-    python3.9-distutils
+    python3.9-distutils \
+    libgmp-dev \
+    gperf \
+    autoconf
+
+RUN git clone https://github.com/SRI-CSL/yices2.git && \
+    cd yices2 && \
+    autoconf && \
+    ./configure && \
+    make -j && \
+    sudo make install && \
+    cd .. && \
+    rm -rf yices2
 
 # Install Julia
 RUN curl -fsSL https://julialang-s3.julialang.org/bin/linux/x64/1.7/julia-1.7.1-linux-x86_64.tar.gz -o julia.tar.gz && \
