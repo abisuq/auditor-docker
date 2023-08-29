@@ -14,9 +14,8 @@ Our beta version is up and running! I'm keen on keeping it fresh with the latest
     * [1.4 To relaunch the docker instance](#to-relaunch-the-docker-instance)
     * [1.5 Credentials](#credentials)
 2. [Auditor Toolbox for Ethereum Smart Contracts](#auditor-toolbox-for-ethereum-smart-contracts)
-3. [Troubleshooting](#troubleshooting)
-    * [3.1 Parent system out of time](#parent-system-out-of-time)
-    * [3.2 `code` not working](#code-not-working)
+3. [Scripts](#scripts)
+4. [Troubleshooting](#troubleshooting)
 
 ## Basic build 
 Clone the repo and `cd` into it
@@ -80,7 +79,7 @@ Easily deploy an auditing environment for Ethereum smart contracts using this Do
 
 ### Quick Start
 
-Execute the add2 command:
+After the docker is builded, you may be missing some tool not installed by default, if so, execute the `add2` command:
 
 ```bash
 add2
@@ -92,15 +91,17 @@ Select the option you want to install and voila, you're all set!
 ### Base Setup:
 - **Operating System**: Ubuntu Jammy (22.04)
 - **Utilities**: Git, Curl/wget, gawk/ripgrep, z3, pandoc, openssh-client, texlive, solidity plugins for Vim, etc.
+- **Ethereum** dependencies.
 ### Languages & Frameworks:
 - **Python**: Version 3.9
 - **Rust**: Comprehensive setup with Cargo
 - **Julia**: Built-in support.
 - **Noir**: Support for the Noir language (Nargo).
 - **Circom**: Framework for zkSNARK circuits.
+- **Solidity**: Smart contracts language.
+- **Vyper**: Smart contracts language.
 ###  Ethereum Development:
 A set of most of the famous tools in the ecosystem by different authors.
-- **Ethereum** dependencies.
 - **Foundry** as modular toolkit for Ethereum application development written in Rust. It includes: **Forge**, **Anvil**, **Cast**, and **Chisel**. Author Paradigm.
 - **Halmos** for Symbolic Bounded Model Checker for Ethereum Smart Contracts Bytecode. Author a16z.
 - **Heimdall** for advanced EVM smart contract toolkit specialized in bytecode analysis. Author Jon-Becker.
@@ -110,6 +111,8 @@ A set of most of the famous tools in the ecosystem by different authors.
 - **Mythril** for smart contract analysis. Author Consensys.
 - **Spearbit Report Generator**, all needed **dependencies** to use the report generator in Spearbit audits
 - **Python developer kit**: It includes **Vyper**, **Ape-Vyper**, **Py-solc-x** and **pyevwasm**, can be found in `add2`
+- **4nalyz3r**: A comprehensive static analysis tool for smart contracts. Author: Picodes.
+- **Ganache** and **Truffle**: Tools such as running a personal blockchain, development environment, testing framework, and asset pipeline for Ethereum. Author: Truffle Suite.
 ### Node.js Development:
 - **NVM**: Node Version Manager to switch between different Node.js versions.
 - **Node**: Long Term Support (LTS) version.
@@ -120,25 +123,20 @@ For more info go to the [table](https://github.com/Deivitto/auditor-docker/wiki/
 Additionally, the image sets up an environment for a user named `whitehat` and includes several installer scripts to simplify the installation of various tools and libraries.
 
 ## Scripts
-
+### add2
 The toolbox includes scripts to fast install multiple packages, utilities or dependencies that maybe not all auditors but a considerable part may use. To launch the install script:
 
 ```bash
-add2
+add2 # this is a shortcut of add2lbox
 ```
 
-or 
-
-```bash
-add2lbox
-```
-
+### add2-update
 It also includes a script to update the scripts and templates folder with the latest version of this github:
 
 ```bash
 add2-update
 ```
-
+### issue
 Also, it includes a script to create issues fastly without leaving the docker enviornment. Example:
 
 ```bash
@@ -146,52 +144,17 @@ issue c4 -n UncheckedTransfer -vim
 ```
 
 That would create an issue with the Code4rena template, with name UncheckedTransfer and it is opened at the end using vim. For more info run `issue -h`
+### analyze4
+`analyze4` is a wrapper designed to seamlessly and intuitively execute the `yarn analyze` command from .4nalyz3r, making the process more transparent for the user." To use it, just go to the project you want to analyze, and run something like:
+
+```bash
+analyze4 src -nano
+```
+This would get the relative path of the src folder where all the contracts are (if the contracts folder is named "contracts", just change the word) and will launch 4nalyz3r against that code. The output will be given in the current folder and in this case, opened with nano text editor.
+
 
 # Troubleshooting
-## Parent system out of time
-**Issue**: Exit code 100
-
-**Breaks**: on building, not even 2 seconds
-
-```bash
-ERROR: failed to solve: process "/bin/sh -c apt-get update &&     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends     build-essential     curl     git     vim     nano     z3     libz3-dev     ripgrep     gawk     libssl-dev     sudo     wget     software-properties-common     libudev-dev     locales     gpg-agent     dialog     procps     file     pandoc     texlive     ca-certificates &&     rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100
-```
-
-Launch the next command to sync your time with the Google server and build again
-```bash
-sudo date -s "$(curl -s --head http://google.com | grep ^Date: | sed 's/Date: //g')"
-```
-## `code` not working
-**Issue**: `code` command not found
-
-**Breaks**: on use. Doesn't recognize `code`
-
-### Solution 1: Sometimes work
-
-Use this command to append to the file `.bashrc` an alias to find the vscode `code` command
-```bash
-echo "VSCODE_SSH_BIN=$(echo "$BROWSER" | sed -e 's/\/helpers\/browser.sh//g')
-alias code='$VSCODE_SSH_BIN/remote-cli/code'" >> ~/.bashrc 
-```
-
-Then source it
-```bash
-source ~/.bashrc 
-```
-
-### Solution 2
-This was pretty more annoying, but totally worked
-- Step 1: Inside the docker machine, remove the /.vscode-server. Run:
-```bash
-rm -r ~/.vscode-server # you can also run mv ~/.vscode-server ~/.backup-vscode-server
-```
-- Step 2: Outside the docker machine, shutdown wsl what is linked with docker, run:
-```bash
-wsl --shutdown
-```
-
-This will first make docker desktop look like there are no instances of the machines, but after restarting docker desktop, it will show them again.
-
-- Step 3: Restart docker desktop (in case you are using it)
-- Step 4: Newly launch the command palette and attach the docker image from vscode and enjoy having `code` ready again :P
-
+For general information, go to [Troubleshooting](https://github.com/Deivitto/auditor-docker/wiki/Troubleshooting) section in the wiki
+- [v0.0.1: `yarn`: command not found](https://github.com/Deivitto/auditor-docker/wiki/Troubleshooting#yarn-command-not-found)
+- [Parent system out of time](https://github.com/Deivitto/auditor-docker/wiki/Troubleshooting#parent-system-out-of-time)
+- [`code` not working](https://github.com/Deivitto/auditor-docker/wiki/Troubleshooting#code-not-working)
